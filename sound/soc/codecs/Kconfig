@@ -2278,6 +2278,15 @@ config SND_SOC_TDA7419
 	depends on I2C
 	select REGMAP_I2C
 
+config SND_SOC_TFA9872
+	tristate "NXP Semiconductors TFA9872/TFA9874 amplifier"
+	depends on I2C
+	select REGMAP_I2C
+	help
+	  Enable support for the NXP TFA9872/TFA9873/TFA9874 smart
+	  speaker amplifiers, including the two TFA9874 devices used by
+	  the OnePlus 8.
+
 config SND_SOC_TFA9879
 	tristate "NXP Semiconductors TFA9879 amplifier"
 	depends on I2C
