@@ -152,17 +152,10 @@ static int samsung_amb655uv01_on(struct samsung_amb655uv01 *ctx)
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0x5a, 0x5a);
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf5, 0x87);
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0xa5, 0xa5);
-	/* The bootloader can leave the AMOLED in inversion mode across a warm
-	 * restart.  Clear the DCS latch after the vendor unlock sequence. */
-	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, MIPI_DCS_EXIT_INVERT_MODE);
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x9f, 0x5a, 0x5a);
 	mipi_dsi_dcs_set_display_on_multi(&dsi_ctx);
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, MIPI_DCS_ENTER_NORMAL_MODE);
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x9f, 0xa5, 0xa5);
-	/* Some AMB655 revisions apply the inversion latch only after normal
-	 * mode is entered.  Repeat the standard DCS command with the vendor
-	 * page key closed so warm boots cannot retain the negative-color state. */
-	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, MIPI_DCS_EXIT_INVERT_MODE);
 
 	return dsi_ctx.accum_err;
 }

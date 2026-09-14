@@ -86,6 +86,8 @@
 
 		framebuffer: framebuffer@9c000000 {
 			compatible = "simple-framebuffer";
+			/* Let msm_dpu initialize the panel without a bootloader handoff. */
+			status = "disabled";
 			reg = <0 0x9c000000 0 0x2300000>;
 			width = <1080>;
 			height = <2400>;
@@ -267,6 +269,7 @@
 		regulator-max-microvolt = <5500000>;
 		regulator-enable-ramp-delay = <233>;
 		gpio = <&tlmm 61 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
 		regulator-boot-on;
 		pinctrl-names = "default";
 		pinctrl-0 = <&panel_avdd_pins>;
