@@ -479,6 +479,30 @@ void qcom_scm_cpu_power_down(u32 flags)
 }
 EXPORT_SYMBOL_GPL(qcom_scm_cpu_power_down);
 
+bool qcom_scm_deassert_ps_hold_available(void)
+{
+	if (!qcom_scm_is_available())
+		return false;
+
+	return __qcom_scm_is_call_available(__scm->dev, QCOM_SCM_SVC_PWR,
+					    QCOM_SCM_PWR_DEASSERT_PS_HOLD);
+}
+EXPORT_SYMBOL_GPL(qcom_scm_deassert_ps_hold_available);
+
+int qcom_scm_deassert_ps_hold(void)
+{
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_PWR,
+		.cmd = QCOM_SCM_PWR_DEASSERT_PS_HOLD,
+		.args[0] = 0,
+		.arginfo = QCOM_SCM_ARGS(1),
+		.owner = ARM_SMCCC_OWNER_SIP,
+	};
+
+	return qcom_scm_call_atomic(__scm ? __scm->dev : NULL, &desc, NULL);
+}
+EXPORT_SYMBOL_GPL(qcom_scm_deassert_ps_hold);
+
 int qcom_scm_set_remote_state(u32 state, u32 id)
 {
 	struct qcom_scm_desc desc = {

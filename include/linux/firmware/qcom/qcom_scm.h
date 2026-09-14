@@ -60,6 +60,8 @@ enum qcom_scm_ice_cipher {
 #define QCOM_SCM_PERM_RWX (QCOM_SCM_PERM_RW | QCOM_SCM_PERM_EXEC)
 
 bool qcom_scm_is_available(void);
+bool qcom_scm_deassert_ps_hold_available(void);
+int qcom_scm_deassert_ps_hold(void);
 
 int qcom_scm_set_cold_boot_addr(void *entry);
 int qcom_scm_set_warm_boot_addr(void *entry);

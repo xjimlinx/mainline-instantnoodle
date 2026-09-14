@@ -356,6 +356,13 @@
 	};
 };
 
+&soc {
+	restart@c264000 {
+		compatible = "qcom,pshold";
+		reg = <0 0x0c264000 0 0x4>;
+	};
+};
+
 &adsp {
 	firmware-name = "qcom/sm8250/OnePlus/adsp.mbn";
 	status = "okay";
@@ -1189,6 +1196,11 @@
 		input-disable;
 	};
 
+};
+
+/* The primary PM8150 PON owns reboot-mode and the physical power keys. */
+&pm8009_pon {
+	status = "disabled";
 };
 
 &pm8150_adc {

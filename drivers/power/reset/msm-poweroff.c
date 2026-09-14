@@ -12,11 +12,17 @@
 #include <linux/module.h>
 #include <linux/reboot.h>
 #include <linux/pm.h>
+#include <linux/firmware/qcom/qcom_scm.h>
 
 static void __iomem *msm_ps_hold;
+static bool scm_deassert_ps_hold;
 
 static int do_msm_poweroff(struct sys_off_data *data)
 {
+	if (scm_deassert_ps_hold)
+		qcom_scm_deassert_ps_hold();
+
+	/* Fall through in case the secure call is unavailable or returns. */
 	writel(0, msm_ps_hold);
 	mdelay(10000);
 
@@ -28,6 +34,10 @@ static int msm_restart_probe(struct platform_device *pdev)
 	msm_ps_hold = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(msm_ps_hold))
 		return PTR_ERR(msm_ps_hold);
+
+	scm_deassert_ps_hold = qcom_scm_deassert_ps_hold_available();
+	dev_info(&pdev->dev, "secure PS_HOLD deassertion %s\n",
+		 scm_deassert_ps_hold ? "available" : "unavailable");
 
 	devm_register_sys_off_handler(&pdev->dev, SYS_OFF_MODE_RESTART,
 				      128, do_msm_poweroff, NULL);
