@@ -1173,13 +1173,14 @@
 &pcie2 {
 	vdda-supply = <&vreg_l9a_1p2>;
 	vddpe-3v3-supply = <&vreg_l11c_3p3>;
-	status = "okay";
+	/* The SDX55 modem is intentionally disabled for this Linux phone build. */
+	status = "disabled";
 };
 
 &pcie2_phy {
 	vdda-phy-supply = <&vreg_l5a_0p88>;
 	vdda-pll-supply = <&vreg_l9a_1p2>;
-	status = "okay";
+	status = "disabled";
 };
 
 &pm8009_gpios {
