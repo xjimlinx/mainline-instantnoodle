@@ -7,6 +7,7 @@
 #include <linux/bitfield.h>
 #include <linux/clk.h>
 #include <linux/clk-provider.h>
+#include <linux/delay.h>
 #include <linux/iopoll.h>
 
 #include "dsi_phy.h"
@@ -491,23 +492,33 @@ static void dsi_pll_phy_dig_reset(struct dsi_pll_7nm *pll)
 static int dsi_pll_7nm_vco_prepare(struct clk_hw *hw)
 {
 	struct dsi_pll_7nm *pll_7nm = to_pll_7nm(hw);
-	int rc;
+	int rc, attempt;
 
 	dsi_pll_enable_pll_bias(pll_7nm);
 	if (pll_7nm->slave)
 		dsi_pll_enable_pll_bias(pll_7nm->slave);
 
-	/* Start PLL */
-	writel(BIT(0), pll_7nm->phy->base + REG_DSI_7nm_PHY_CMN_PLL_CNTRL);
+	/* Warm restarts can leave the 7nm PHY partially powered. Retry the full
+	 * PLL start sequence so a transient lock failure cannot corrupt the first
+	 * DSI command stream sent to the panel. */
+	for (attempt = 0; attempt < 3; attempt++) {
+		if (attempt) {
+			dsi_pll_disable_pll_bias(pll_7nm);
+			if (pll_7nm->slave)
+				dsi_pll_disable_pll_bias(pll_7nm->slave);
+			usleep_range(1000, 1500);
+			dsi_pll_enable_pll_bias(pll_7nm);
+			if (pll_7nm->slave)
+				dsi_pll_enable_pll_bias(pll_7nm->slave);
+		}
 
-	/*
-	 * ensure all PLL configurations are written prior to checking
-	 * for PLL lock.
-	 */
-	wmb();
-
-	/* Check for PLL lock */
-	rc = dsi_pll_7nm_lock_status(pll_7nm);
+		/* Start PLL and flush writes before polling the lock bit. */
+		writel(BIT(0), pll_7nm->phy->base + REG_DSI_7nm_PHY_CMN_PLL_CNTRL);
+		wmb();
+		rc = dsi_pll_7nm_lock_status(pll_7nm);
+		if (!rc)
+			break;
+	}
 	if (rc) {
 		pr_err("PLL(%d) lock failed\n", pll_7nm->phy->id);
 		goto error;
